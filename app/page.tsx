@@ -430,13 +430,15 @@ function FruitTeaContent() {
                     Facebook
                   </Button>
                 </Link>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-gray-600 text-gray-400 hover:text-green-400 hover:border-green-400 bg-transparent"
-                >
-                  Instagram
-                </Button>
+                <Link href="https://www.instagram.com/fufootea/" target="_blank" rel="noopener noreferrer">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-gray-600 text-gray-400 hover:text-green-400 hover:border-green-400 bg-transparent"
+                  >
+                    Instagram
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
