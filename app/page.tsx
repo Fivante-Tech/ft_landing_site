@@ -175,11 +175,11 @@ function FruitTeaContent() {
           </div>
           <div className="relative max-w-4xl mx-auto">
             <Image
-              src="/images/fufootea-logo.png"
-              alt="Fufootea - Premium Fruit Tea"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/493864951_122155537346441974_1586368821575391203_n.jpg-QQbCgDsjUugHILS4KnET3KtfVTyv6G.jpeg"
+              alt="Fufootea Menu - Seasonal Fruit & Vegetable Tea Collection"
               width={800}
               height={400}
-              className="rounded-2xl shadow-2xl object-contain bg-white p-8"
+              className="rounded-2xl shadow-2xl object-cover"
             />
           </div>
         </div>
