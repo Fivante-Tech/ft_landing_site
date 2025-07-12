@@ -421,13 +421,15 @@ function FruitTeaContent() {
               <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
               <p className="text-gray-400 mb-4">Stay updated with our latest flavors and offers!</p>
               <div className="flex space-x-4">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-gray-600 text-gray-400 hover:text-green-400 hover:border-green-400 bg-transparent"
-                >
-                  Facebook
-                </Button>
+                <Link href="https://www.facebook.com/fufootea" target="_blank" rel="noopener noreferrer">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-gray-600 text-gray-400 hover:text-green-400 hover:border-green-400 bg-transparent"
+                  >
+                    Facebook
+                  </Button>
+                </Link>
                 <Button
                   size="sm"
                   variant="outline"
