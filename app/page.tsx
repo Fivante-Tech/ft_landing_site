@@ -158,8 +158,7 @@ function FruitTeaContent() {
             <span className="text-orange-500">Experience</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Discover our premium collection of handcrafted fruit teas made with the finest natural ingredients.
-            Refreshing, healthy, and bursting with flavor.
+            Discover our premium collection of handcrafted fruit teas made with the finest natural ingredients. Refreshing, healthy, and bursting with flavor.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button size="lg" className="bg-green-600 hover:bg-green-700 text-lg px-8 py-3">
@@ -273,14 +272,9 @@ function FruitTeaContent() {
             <div>
               <h2 className="text-4xl font-bold text-gray-800 mb-6">Our Story</h2>
               <p className="text-lg text-gray-600 mb-6">
-                Founded in 2020, FreshTea began as a passion project to bring the finest fruit tea experience to tea
-                lovers everywhere. We source our fruits from local organic farms and blend them with premium tea leaves
-                to create unique, refreshing beverages.
+                {"FufooTea is a proudly Malaysian local brand, dedicated to serving the finest handcrafted tea — brewed with honesty, heart, and real ingredients. We believe in keeping it real: real fruits, real tea, and real passion in every cup. 🍵✨\n\nFrom our very first blend, we’ve stayed true to our roots — creating refreshing, feel-good drinks that celebrate the simplicity of natural flavors and the joy of sharing good tea with good people.\n\nWelcome to FufooTea. Stay real, sip happy. 💛"}
               </p>
-              <p className="text-lg text-gray-600 mb-8">
-                Every cup tells a story of quality, sustainability, and the pure joy of natural flavors. Our commitment
-                to excellence has made us a favorite among health-conscious tea enthusiasts.
-              </p>
+              
               <div className="grid grid-cols-3 gap-6 text-center">
                 <div>
                   <div className="text-3xl font-bold text-green-600 mb-2">50K+</div>
@@ -322,7 +316,7 @@ function FruitTeaContent() {
               <CardContent className="p-8">
                 <Phone className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Call Us</h3>
-                <p className="text-gray-600">+1 (555) 123-4567</p>
+                <p className="text-gray-600">+60 13-604 1491</p>
                 <p className="text-sm text-gray-500 mt-2">Mon-Fri 9AM-8PM</p>
               </CardContent>
             </Card>
@@ -331,7 +325,7 @@ function FruitTeaContent() {
               <CardContent className="p-8">
                 <Mail className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Email Us</h3>
-                <p className="text-gray-600">hello@freshtea.com</p>
+                <p className="text-gray-600">fufootea@gmail.com</p>
                 <p className="text-sm text-gray-500 mt-2">We reply within 24 hours</p>
               </CardContent>
             </Card>
@@ -340,7 +334,7 @@ function FruitTeaContent() {
               <CardContent className="p-8">
                 <MapPin className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Visit Us</h3>
-                <p className="text-gray-600">123 Tea Street</p>
+                <p className="text-gray-600">{"📍Austin Branch, 12pm-12am\n11 jalan austin heights 7/2 taman mount austin \n\n📍Paradigm Mall, 10am-10pm\nLot 3FK-12E, F-H (level3)"}</p>
                 <p className="text-gray-600">Fresh City, FC 12345</p>
               </CardContent>
             </Card>
