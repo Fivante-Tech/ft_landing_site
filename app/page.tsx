@@ -266,7 +266,7 @@ function FruitTeaContent() {
             <div>
               <h2 className="text-4xl font-bold text-gray-800 mb-6">Our Story</h2>
               <p className="text-lg text-gray-600 mb-6 text-justify">
-                {"FufooTea is a proudly Malaysian local brand, dedicated to serving the finest handcrafted tea — brewed with honesty, heart, and real ingredients. We believe in keeping it real: real fruits, real tea, and real passion in every cup. 🍵✨\n\nFrom our very first blend, we’ve stayed true to our roots — creating refreshing, feel-good drinks that celebrate the simplicity of natural flavors and the joy of sharing good tea with good people.\n\nWelcome to FufooTea. Stay real, sip happy. 💛"}
+                {"FufooTea is a proudly Malaysian local brand, dedicated to serving the finest handcrafted tea — brewed with honesty, heart, and real ingredients. We believe in keeping it real: real fruits, real tea, and real passion in every cup. 🍵✨\n\n\n\n\nFrom our very first blend, we’ve stayed true to our roots — creating refreshing, feel-good drinks that celebrate the simplicity of natural flavors and the joy of sharing good tea with good people.\n\nWelcome to FufooTea. Stay real, sip happy. 💛"}
               </p>
               
               <div className="grid grid-cols-3 gap-6 text-center">
