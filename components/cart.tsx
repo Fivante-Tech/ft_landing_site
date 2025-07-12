@@ -13,16 +13,7 @@ export function CartIcon() {
 
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="relative bg-transparent">
-          <ShoppingCart className="h-4 w-4" />
-          {state.itemCount > 0 && (
-            <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-600">
-              {state.itemCount}
-            </Badge>
-          )}
-        </Button>
-      </SheetTrigger>
+      
       <SheetContent className="w-full sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>Shopping Cart</SheetTitle>

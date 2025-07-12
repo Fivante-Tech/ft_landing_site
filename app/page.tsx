@@ -48,9 +48,7 @@ function ProductCard({ product }: { product: any }) {
             <span className="text-sm text-gray-600">{product.rating}</span>
           </div>
         </div>
-        <Button onClick={addToCart} className="w-full mt-4 bg-green-600 hover:bg-green-700">
-          Add to Cart
-        </Button>
+        
       </CardContent>
     </Card>
   )
@@ -144,7 +142,7 @@ function FruitTeaContent() {
           </nav>
           <div className="flex items-center space-x-4">
             <CartIcon />
-            <Button className="bg-green-600 hover:bg-green-700">Order Now</Button>
+            
           </div>
         </div>
       </header>
@@ -225,9 +223,7 @@ function FruitTeaContent() {
                   Mix and match any of our signature fruit teas. Perfect for sharing with friends or stocking up on your
                   favorites.
                 </p>
-                <Button size="lg" variant="secondary" className="bg-white text-green-600 hover:bg-gray-100">
-                  Claim Offer
-                </Button>
+                
               </CardContent>
             </Card>
 
@@ -243,9 +239,7 @@ function FruitTeaContent() {
                 <p className="text-orange-100 mb-6 text-lg">
                   Welcome to FreshTea! Enjoy 20% off your first order when you sign up for our newsletter.
                 </p>
-                <Button size="lg" variant="secondary" className="bg-white text-orange-600 hover:bg-gray-100">
-                  Get Discount
-                </Button>
+                
               </CardContent>
             </Card>
           </div>
@@ -258,7 +252,7 @@ function FruitTeaContent() {
                   Join our FreshTea Rewards program and earn points with every purchase. Redeem points for free drinks,
                   exclusive flavors, and special discounts.
                 </p>
-                <Button className="bg-green-600 hover:bg-green-700">Join Rewards Program</Button>
+                
               </CardContent>
             </Card>
           </div>
