@@ -1,215 +1,137 @@
-"use client";
+"use client"
 
-import { useEffect, type CSSProperties } from "react";
+import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
 
-export default function Page() {
-  // CSS custom property for the hero background image (keeps original filename)
-  const heroStyle: CSSProperties = { ["--hero" as any]: "url('assets/Ccover.jpg')" };
+export default function HomePage() {
+  const [currentLang, setCurrentLang] = useState("zh")
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [lightboxSrc, setLightboxSrc] = useState("")
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const progressRef = useRef<HTMLDivElement>(null)
+  const timerRef = useRef<NodeJS.Timeout>()
+
+  const seasonalSlides = [
+    { src: "/camellia-oolong-milk-tea-poster.png", caption: "Camellia Oolong · 山茶花海" },
+    { src: "/da-hong-pao-milk-tea-poster.png", caption: "Da Hong Pao · 一袭红袍" },
+    { src: "/autumn-black-milk-tea-poster.png", caption: "Autumn Black · 如烟知秋" },
+    { src: "/white-peach-oolong-milk-tea-poster.png", caption: "White Peach Oolong · 陌上白桃" },
+    { src: "/jasmine-green-milk-tea-poster.png", caption: "Jasmine Green · 悠悠茉绿" },
+  ]
 
   useEffect(() => {
-    // ---- Mounted from your original inline scripts ----
-    try {
-      // DEBUG FIX: ensure #y exists before writing, prevents TypeError
-      const yel = document.getElementById("y");
-      if (yel) {
-        yel.textContent = new Date().getFullYear().toString();
-      }
+    const saved = localStorage.getItem("lang") || "zh"
+    setCurrentLang(saved)
+  }, [])
 
-      (function () {
-        const KEY = "lang";
-        const show = (lang: string) => {
-          document.querySelectorAll<HTMLElement>("[data-lang]").forEach((el) => {
-            const on = el.getAttribute("data-lang") === lang;
-            el.hidden = !on;
-            if (on) el.style.removeProperty("display");
-          });
-          localStorage.setItem(KEY, lang);
-          const hero = document.getElementById("hero");
-          if (hero) hero.scrollIntoView({ behavior: "smooth", block: "start" });
-        };
-        const s = localStorage.getItem(KEY) || "zh";
-        show(s);
-        document.getElementById("lang-zh")?.addEventListener("click", () => show("zh"));
-        document.getElementById("lang-en")?.addEventListener("click", () => show("en"));
-      })();
+  useEffect(() => {
+    localStorage.setItem("lang", currentLang)
+  }, [currentLang])
 
-      (function () {
-        const lb = document.createElement("div");
-        lb.className = "lightbox";
-        lb.setAttribute("aria-hidden", "true");
-        lb.innerHTML = '<img alt="menu enlarged" />';
-        document.body.appendChild(lb);
-        const img = lb.querySelector("img") as HTMLImageElement | null;
-
-        document
-          .querySelectorAll<HTMLImageElement>(".menu-img, .seasonal-carousel img, .hero-bento img, .loc-visual")
-          .forEach((el) => {
-            el.style.cursor = "zoom-in";
-            el.addEventListener("click", () => {
-              if (!img) return;
-              img.src = el.src;
-              lb.setAttribute("aria-hidden", "false");
-            });
-          });
-
-        lb.addEventListener("click", () => {
-          lb.setAttribute("aria-hidden", "true");
-          if (img) img.src = "";
-        });
-      })();
-
-      // Lightbox support for Hero cover background
-      (function () {
-        const lb = document.querySelector(".lightbox");
-        const img = lb && (lb.querySelector("img") as HTMLImageElement | null);
-        const el = document.querySelector<HTMLElement>(".hero-stage");
-        if (!lb || !img || !el) return;
-        el.style.cursor = "zoom-in";
-        el.addEventListener("click", () => {
-          const v = getComputedStyle(el).getPropertyValue("--hero");
-          const m = v && v.match(/url\((?:['"])??(.*?)(?:['"])??\)/);
-          if (m) {
-            img.src = m[1];
-            lb.setAttribute("aria-hidden", "false");
-          }
-        });
-      })();
-
-      (function () {
-        const scroller = document.getElementById("seasonal-scroller");
-        const prev = document.getElementById("seasonal-prev");
-        const next = document.getElementById("seasonal-next");
-        const progress = document.getElementById("seasonal-progress") as HTMLElement | null;
-        const dotsWrap = document.getElementById("seasonal-dots");
-        if (!scroller || !dotsWrap || !progress) return;
-
-        const slides = Array.from(scroller.querySelectorAll(".slide"));
-        slides.forEach((_, i) => {
-          const d = document.createElement("button");
-          d.className = "dot";
-          d.setAttribute("aria-label", "第" + (i + 1) + "张");
-          d.addEventListener("click", () => go(i));
-          dotsWrap.appendChild(d);
-        });
-
-        let idx = 0;
-        let timer: any = null;
-        const DURATION = 5000;
-
-        function update() {
-          dotsWrap.querySelectorAll(".dot").forEach((d, i) => d.setAttribute("aria-current", i === idx ? "true" : "false"));
-        }
-
-        function go(i: number) {
-          idx = (i + slides.length) % slides.length;
-          const step = (scroller as HTMLElement).clientWidth * 1;
-          scroller.scrollTo({ left: idx * step, behavior: "smooth" });
-          restart();
-          update();
-        }
-
-        function restart() {
-          progress.style.transition = "none";
-          progress.style.width = "0%";
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              progress.style.transition = `width ${DURATION}ms linear`;
-              progress.style.width = "100%";
-            });
-          });
-          clearInterval(timer);
-          timer = setInterval(() => {
-            go(idx + 1);
-          }, DURATION);
-        }
-
-        prev?.addEventListener("click", () => go(idx - 1));
-        next?.addEventListener("click", () => go(idx + 1));
-        scroller.addEventListener("pointerdown", () => {
-          clearInterval(timer);
-        });
-        scroller.addEventListener("pointerup", () => {
-          restart();
-        });
-        window.addEventListener("resize", () => {
-          go(idx);
-        });
-        update();
-        restart();
-      })();
-
-      // Instagram latest 3 (static placeholders)
-      (function () {
-        const grid = document.getElementById("ig-grid");
-        if (!grid) return;
-        // already rendered via HTML; keep for safety if JS reloads the grid elsewhere
-      })();
-
-      // --- Self-tests (console) ---
-      (function () {
-        function assert(cond: boolean, name: string) {
-          console[cond ? "log" : "error"]("[test]", name, cond ? "OK" : "FAIL");
-        }
-        assert(!!document.getElementById("y"), "year span exists");
-        assert(document.querySelectorAll(".lang").length === 2, "language buttons x2");
-        assert(document.querySelectorAll("#locations [data-lang]").length >= 4, "bilingual location fields");
-        assert(document.querySelectorAll("#seasonal-scroller .slide").length === 5, "seasonal has 5 slides");
-      })();
-    } catch (e) {
-      console.error("[init scripts] error:", e);
+  useEffect(() => {
+    startCarousel()
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, []);
+  }, [])
+
+  const switchLanguage = (lang: string) => {
+    setCurrentLang(lang)
+    document.getElementById("hero")?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  const startCarousel = () => {
+    if (progressRef.current) {
+      progressRef.current.style.transition = "none"
+      progressRef.current.style.width = "0%"
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (progressRef.current) {
+            progressRef.current.style.transition = "width 5000ms linear"
+            progressRef.current.style.width = "100%"
+          }
+        })
+      })
+    }
+
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % seasonalSlides.length)
+    }, 5000)
+  }
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index)
+    if (carouselRef.current) {
+      const slideWidth = carouselRef.current.clientWidth
+      carouselRef.current.scrollTo({
+        left: index * slideWidth,
+        behavior: "smooth",
+      })
+    }
+    startCarousel()
+  }
+
+  const openLightbox = (src: string) => {
+    setLightboxSrc(src)
+  }
+
+  const closeLightbox = () => {
+    setLightboxSrc("")
+  }
+
+  const T = ({ zh, en }: { zh: string; en: string }) => <span>{currentLang === "zh" ? zh : en}</span>
 
   return (
     <>
-      <header>
-        <div className="container nav" role="navigation" aria-label="主导航">
-          <div className="brand">
-            <div className="brandname">Fufootea 茶满满</div>
+      <a className="skip" href="#main">
+        跳到主要内容
+      </a>
+
+      <header className="sticky top-0 backdrop-blur-md bg-[color-mix(in_oklab,var(--color-bg)_80%,transparent)] border-b border-gray-200 z-50">
+        <div className="container mx-auto px-4 flex items-center justify-between gap-4 h-16">
+          <div className="flex items-center gap-3">
+            <div className="font-extrabold tracking-wide font-serif">Fufootea 茶满满</div>
           </div>
 
-          <nav className="nav" aria-label="页面链接">
-            <ul>
+          <nav className="hidden md:block">
+            <ul className="flex gap-5 list-none p-0 m-0">
               <li>
-                <a href="#hero">
-                  <span data-lang="zh">品牌故事</span>
-                  <span data-lang="en" hidden>
-                    Story
-                  </span>
+                <a href="#hero" className="opacity-90 hover:opacity-100">
+                  <T zh="品牌故事" en="Story" />
                 </a>
               </li>
               <li>
-                <a href="#menu">
-                  <span data-lang="zh">菜单</span>
-                  <span data-lang="en" hidden>
-                    Menu
-                  </span>
+                <a href="#menu" className="opacity-90 hover:opacity-100">
+                  <T zh="菜单" en="Menu" />
                 </a>
               </li>
               <li>
-                <a href="#locations">
-                  <span data-lang="zh">门店</span>
-                  <span data-lang="en" hidden>
-                    Locations
-                  </span>
+                <a href="#locations" className="opacity-90 hover:opacity-100">
+                  <T zh="门店" en="Locations" />
                 </a>
               </li>
               <li>
-                <a href="#contact">
-                  <span data-lang="zh">联系</span>
-                  <span data-lang="en" hidden>
-                    Contact
-                  </span>
+                <a href="#contact" className="opacity-90 hover:opacity-100">
+                  <T zh="联系" en="Contact" />
                 </a>
               </li>
             </ul>
           </nav>
 
-          <div className="nav-cta lang-switch">
-            <button id="lang-zh" className="lang" aria-label="切换中文" title="中文">
+          <div className="flex gap-2">
+            <button
+              onClick={() => switchLanguage("zh")}
+              className={`border border-gray-200 bg-transparent rounded-full w-11 h-9 flex items-center justify-center cursor-pointer font-bold transition-all duration-200 ${currentLang === "zh" ? "bg-[#c6a25c] text-white border-[#c6a25c]" : "hover:border-[#c6a25c]"}`}
+              aria-label="切换中文"
+            >
               中
             </button>
-            <button id="lang-en" className="lang" aria-label="Switch to English" title="EN">
+            <button
+              onClick={() => switchLanguage("en")}
+              className={`border border-gray-200 bg-transparent rounded-full w-11 h-9 flex items-center justify-center cursor-pointer font-bold transition-all duration-200 ${currentLang === "en" ? "bg-[#c6a25c] text-white border-[#c6a25c]" : "hover:border-[#c6a25c]"}`}
+              aria-label="Switch to English"
+            >
               EN
             </button>
           </div>
@@ -217,299 +139,291 @@ export default function Page() {
       </header>
 
       <main id="main">
-        {/* Hero */}
-        <section id="hero" className="hero container" aria-label="首屏宣传">
-          <div className="grid">
+        <section id="hero" className="py-12 md:py-24 container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
-              <div className="badge" aria-label="穆斯林友好">
-                #MuslimFriendly
+              <div className="flex gap-2 mb-4 flex-wrap">
+                <div className="inline-flex items-center px-3 py-1.5 border border-gray-200 rounded-full text-sm bg-[rgba(198,162,92,0.12)]">
+                  #MuslimFriendly
+                </div>
+                <div className="inline-flex items-center px-3 py-1.5 border border-gray-200 rounded-full text-sm bg-[rgba(198,162,92,0.12)]">
+                  #localbrand
+                </div>
               </div>
-              <div className="badge" aria-label="本地品牌">
-                #localbrand
-              </div>
-              <h1 className="display">
-                <span data-lang="zh">好茶·不将就·</span>
-                <span data-lang="en" hidden>
-                  Be Real to Fruits &amp; Tea
-                </span>
+              <h1 className="display text-3xl md:text-5xl lg:text-6xl font-bold mb-4">
+                <T zh="好茶·不将就·" en="Be Real to Fruits & Tea" />
               </h1>
-              <p className="sub muted">
-                <span data-lang="en">
-                  FufooTea is a proudly Malaysian local brand, dedicated to serving the finest handcrafted tea — brewed with honesty, heart, and real ingredients. We believe in keeping it real: real fruits, real tea, and real passion in every cup. 🍵✨ From
-                  our very first blend, we’ve stayed true to our roots — creating refreshing, feel-good drinks that celebrate the simplicity of natural flavors and the joy of sharing good tea with good people. Welcome to FufooTea. Stay real, sip happy. 💛
-                </span>
-                <span data-lang="zh" hidden>
-                  FufooTea 源自马来西亚的本地品牌，专注于奉上用心手作的好茶——以诚意、温度与真材实料酿煮而成。我们坚持真实：每一杯都是真水果、真茶叶，也是真热爱。自第一杯调配起，我们始终不忘初心——以自然而单纯的风味，做让人身心舒畅的好喝饮品，与爱茶的你分享美好。欢迎来到 FufooTea，保持真实，畅快喝茶。💛
-                </span>
+              <p className="text-base md:text-lg text-gray-600 mb-6">
+                <T
+                  zh="FufooTea 源自马来西亚的本地品牌，专注于奉上用心手作的好茶——以诚意、温度与真材实料酿煮而成。我们坚持真实：每一杯都是真水果、真茶叶，也是真热爱。自第一杯调配起，我们始终不忘初心——以自然而单纯的风味，做让人身心舒畅的好喝饮品，与爱茶的你分享美好。欢迎来到 FufooTea，保持真实，畅快喝茶。💛"
+                  en="FufooTea is a proudly Malaysian local brand, dedicated to serving the finest handcrafted tea — brewed with honesty, heart, and real ingredients. We believe in keeping it real: real fruits, real tea, and real passion in every cup. 🍵✨ From our very first blend, we've stayed true to our roots — creating refreshing, feel-good drinks that celebrate the simplicity of natural flavors and the joy of sharing good tea with good people. Welcome to FufooTea. Stay real, sip happy. 💛"
+                />
               </p>
             </div>
-
-            <div className="hero-stage" aria-label="品牌视觉背景" style={heroStyle}></div>
+            <div
+              className="hero-stage cursor-zoom-in"
+              style={
+                { "--hero": "url(/placeholder.svg?height=600&width=800&query=Fufootea tea shop cover image)" } as any
+              }
+              onClick={() => openLightbox("/fufootea-tea-shop-cover.png")}
+            />
           </div>
         </section>
 
-        {/* Signatures */}
-        <section className="container" aria-labelledby="sig">
-          <div className="sec-head">
-            <h2 id="sig">
-              <span data-lang="zh">招牌单品</span>
-              <span data-lang="en" hidden>
-                Signatures
-              </span>
+        <section className="py-12 md:py-18 container mx-auto px-4">
+          <div className="flex items-end justify-between gap-3 mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold font-serif">
+              <T zh="招牌单品" en="Signatures" />
             </h2>
-            <a className="btn" href="#menu">
-              <span data-lang="zh">全部饮品 →</span>
-              <span data-lang="en" hidden>
-                All Drinks →
-              </span>
+            <a
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-full font-semibold border border-gray-200 transition-all duration-200 hover:-translate-y-0.5"
+              href="#menu"
+            >
+              <T zh="全部饮品 →" en="All Drinks →" />
             </a>
           </div>
-
-          <div className="grid grid-3">
-            <article className="card drink" aria-label="Pekan Nanas">
-              <img className="drink-visual" src="assets/2.jpg" alt="Pekan Nanas 主图" />
-              <div className="meta">
-                <h3>
-                  <span data-lang="zh">北干那那 · 凤梨</span>
-                  <span data-lang="en" hidden>
-                    Pekan Nanas · Pineapple
-                  </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <article className="card">
+              <Image
+                src="/pekan-nanas-pineapple-drink.png"
+                alt="Pekan Nanas"
+                width={320}
+                height={400}
+                className="w-full aspect-[4/5] object-cover cursor-zoom-in"
+                onClick={() => openLightbox("/pekan-nanas-pineapple-drink.png")}
+              />
+              <div className="p-4">
+                <h3 className="font-semibold mb-1">
+                  <T zh="北干那那 · 凤梨" en="Pekan Nanas · Pineapple" />
                 </h3>
-                <div className="price">MYR 11.99</div>
+                <div className="font-bold">MYR 11.99</div>
               </div>
             </article>
-
-            <article className="card drink" aria-label="Prosperity Persimmon Peanut">
-              <img className="drink-visual" src="assets/3.jpg" alt="Prosperity Persimmon Peanut 主图" />
-              <div className="meta">
-                <h3>
-                  <span data-lang="zh">好柿花生</span>
-                  <span data-lang="en" hidden>
-                    Prosperity · Persimmon Peanut
-                  </span>
+            <article className="card">
+              <Image
+                src="/prosperity-persimmon-peanut-drink.png"
+                alt="Prosperity Persimmon Peanut"
+                width={320}
+                height={400}
+                className="w-full aspect-[4/5] object-cover cursor-zoom-in"
+                onClick={() => openLightbox("/prosperity-persimmon-peanut-drink.png")}
+              />
+              <div className="p-4">
+                <h3 className="font-semibold mb-1">
+                  <T zh="好柿花生" en="Prosperity · Persimmon Peanut" />
                 </h3>
-                <div className="price">MYR 11.99</div>
+                <div className="font-bold">MYR 11.99</div>
               </div>
             </article>
-
-            <article className="card drink" aria-label="Nasi Lemak Bungkus">
-              <img className="drink-visual" src="assets/1.jpg" alt="Nasi Lemak Bungkus 主图" />
-              <div className="meta">
-                <h3>
-                  <span data-lang="zh">椰浆饭 · 套袋款</span>
-                  <span data-lang="en" hidden>
-                    Nasi Lemak · Bungkus
-                  </span>
+            <article className="card">
+              <Image
+                src="/nasi-lemak-bungkus-drink.png"
+                alt="Nasi Lemak Bungkus"
+                width={320}
+                height={400}
+                className="w-full aspect-[4/5] object-cover cursor-zoom-in"
+                onClick={() => openLightbox("/nasi-lemak-bungkus-drink.png")}
+              />
+              <div className="p-4">
+                <h3 className="font-semibold mb-1">
+                  <T zh="椰浆饭 · 套袋款" en="Nasi Lemak · Bungkus" />
                 </h3>
-                <div className="price">MYR 11.99</div>
+                <div className="font-bold">MYR 11.99</div>
               </div>
             </article>
           </div>
         </section>
 
-        {/* Why Us */}
-        <section className="container" aria-labelledby="usps">
-          <h2 id="usps">
-            <span data-lang="zh">为什么选我们</span>
-            <span data-lang="en" hidden>
-              Why Us
-            </span>
+        <section className="py-12 md:py-18 container mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold font-serif mb-6">
+            <T zh="为什么选我们" en="Why Us" />
           </h2>
-
-          <div className="usps">
-            <div className="usp">
-              <div aria-hidden="true">🥭</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex gap-3 items-start border border-dashed border-gray-200 rounded-2xl p-4">
+              <div className="text-2xl">🥭</div>
               <div>
                 <strong>
-                  <span data-lang="zh">真果 · 真茶 · 真奶</span>
-                  <span data-lang="en" hidden>
-                    Real Fruits · Real Tea · Real Milk
-                  </span>
+                  <T zh="真果 · 真茶 · 真奶" en="Real Fruits · Real Tea · Real Milk" />
                 </strong>
-                <div className="muted">
-                  <span data-lang="zh">拒绝人工香精，用料满满</span>
-                  <span data-lang="en" hidden>
-                    No artificial flavors, only honest ingredients.
-                  </span>
+                <div className="text-gray-600 text-sm mt-1">
+                  <T zh="拒绝人工香精，用料满满" en="No artificial flavors, only honest ingredients." />
                 </div>
               </div>
             </div>
-
-            <div className="usp">
-              <div aria-hidden="true">🍍</div>
+            <div className="flex gap-3 items-start border border-dashed border-gray-200 rounded-2xl p-4">
+              <div className="text-2xl">🍍</div>
               <div>
                 <strong>
-                  <span data-lang="zh">产地当季</span>
-                  <span data-lang="en" hidden>
-                    Seasonal &amp; Sourced
-                  </span>
+                  <T zh="产地当季" en="Seasonal & Sourced" />
                 </strong>
-                <div className="muted">
-                  <span data-lang="zh">Pekan Nanas 凤梨、西瓜等季节风味</span>
-                  <span data-lang="en" hidden>
-                    Pekan Nanas pineapples, watermelon and other seasonal flavors.
-                  </span>
+                <div className="text-gray-600 text-sm mt-1">
+                  <T
+                    zh="Pekan Nanas 凤梨、西瓜等季节风味"
+                    en="Pekan Nanas pineapples, watermelon and other seasonal flavors."
+                  />
                 </div>
               </div>
             </div>
-
-            <div className="usp">
-              <div aria-hidden="true">⚖️</div>
+            <div className="flex gap-3 items-start border border-dashed border-gray-200 rounded-2xl p-4">
+              <div className="text-2xl">⚖️</div>
               <div>
                 <strong>
-                  <span data-lang="zh">糖冰可定制</span>
-                  <span data-lang="en" hidden>
-                    Custom Sugar &amp; Ice
-                  </span>
+                  <T zh="糖冰可定制" en="Custom Sugar & Ice" />
                 </strong>
-                <div className="muted">
-                  <span data-lang="zh">0–100% 糖度与冰量，随心口味</span>
-                  <span data-lang="en" hidden>
-                    0–100% sugar and ice — your call.
-                  </span>
+                <div className="text-gray-600 text-sm mt-1">
+                  <T zh="0–100% 糖度与冰量，随心口味" en="0–100% sugar and ice — your call." />
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Seasonal Carousel */}
-        <section className="container seasonal-carousel" aria-labelledby="seasonal-title">
-          <div className="sec-head">
-            <h2 id="seasonal-title">
-              <span data-lang="zh">当季限定</span>
-              <span data-lang="en" hidden>
-                Seasonal Limited
-              </span>
+        <section className="py-12 md:py-18 container mx-auto px-4">
+          <div className="flex items-end justify-between gap-3 mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold font-serif">
+              <T zh="当季限定" en="Seasonal Limited" />
             </h2>
           </div>
-
-          <div className="progress-wrap" aria-hidden="true">
-            <div id="seasonal-progress" className="progress"></div>
+          <div className="h-1 bg-gray-200 rounded-full overflow-hidden mb-3">
+            <div ref={progressRef} className="progress" />
           </div>
-
-          <div className="carousel" id="seasonal-scroller" aria-label="季节限定主图轮播">
-            <figure className="slide card">
-              <img src="assets/season1.webp" alt="Camellia Oolong Milk Tea 海报" />
-              <figcaption className="cap">Camellia Oolong · 山茶花海</figcaption>
-            </figure>
-            <figure className="slide card">
-              <img src="assets/season2.webp" alt="Da Hong Pao Milk Tea 海报" />
-              <figcaption className="cap">Da Hong Pao · 一袭红袍</figcaption>
-            </figure>
-            <figure className="slide card">
-              <img src="assets/season3.webp" alt="Autumn Black Milk Tea 海报" />
-              <figcaption className="cap">Autumn Black · 如烟知秋</figcaption>
-            </figure>
-            <figure className="slide card">
-              <img src="assets/season4.webp" alt="White Peach Oolong Milk Tea 海报" />
-              <figcaption className="cap">White Peach Oolong · 陌上白桃</figcaption>
-            </figure>
-            <figure className="slide card">
-              <img src="assets/season5.webp" alt="Jasmine Green Milk Tea 海报" />
-              <figcaption className="cap">Jasmine Green · 悠悠茉绿</figcaption>
-            </figure>
+          <div ref={carouselRef} className="carousel mb-4">
+            {seasonalSlides.map((slide, index) => (
+              <figure key={index} className="slide card">
+                <Image
+                  src={slide.src || "/placeholder.svg"}
+                  alt={slide.caption}
+                  width={600}
+                  height={400}
+                  className="w-full aspect-video object-cover cursor-zoom-in"
+                  onClick={() => openLightbox(slide.src)}
+                />
+                <figcaption className="cap">{slide.caption}</figcaption>
+              </figure>
+            ))}
           </div>
-
-          <div className="carousel-controls">
-            <div className="dots" id="seasonal-dots" aria-label="轮播定位点"></div>
-            <button className="btn" id="seasonal-prev" aria-label="上一张">
-              ‹
-            </button>
-            <button className="btn" id="seasonal-next" aria-label="下一张">
-              ›
-            </button>
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              {seasonalSlides.map((_, index) => (
+                <button
+                  key={index}
+                  className="dot"
+                  aria-current={index === currentSlide ? "true" : "false"}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-full font-semibold border border-gray-200 transition-all duration-200 hover:-translate-y-0.5"
+                onClick={() => goToSlide((currentSlide - 1 + seasonalSlides.length) % seasonalSlides.length)}
+              >
+                ‹
+              </button>
+              <button
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-full font-semibold border border-gray-200 transition-all duration-200 hover:-translate-y-0.5"
+                onClick={() => goToSlide((currentSlide + 1) % seasonalSlides.length)}
+              >
+                ›
+              </button>
+            </div>
           </div>
         </section>
 
-        {/* Menu gallery */}
-        <section id="menu" className="container" aria-labelledby="menu-title">
-          <div className="sec-head">
-            <h2 id="menu-title">
-              <span data-lang="zh">菜单</span>
-              <span data-lang="en" hidden>
-                Menu
-              </span>
+        <section id="menu" className="py-12 md:py-18 container mx-auto px-4">
+          <div className="flex items-end justify-between gap-3 mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold font-serif">
+              <T zh="菜单" en="Menu" />
             </h2>
-            <div className="muted">
-              <span data-lang="zh">可点击放大查看，依据当季更新</span>
-              <span data-lang="en" hidden>
-                Tap to zoom. Seasonal updates.
-              </span>
+            <div className="text-gray-600 text-sm">
+              <T zh="可点击放大查看，依据当季更新" en="Tap to zoom. Seasonal updates." />
             </div>
           </div>
-
-          <div className="menu-gallery">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <figure className="card">
-              <img className="menu-img" src="assets/menu1.webp" alt="Fufootea 五月菜单（果蔬茶、鲜奶茶、纯茶、草本茶与糖冰标准）" />
+              <Image
+                src="/fufootea-may-menu.png"
+                alt="Fufootea 五月菜单"
+                width={600}
+                height={800}
+                className="w-full h-auto cursor-zoom-in"
+                onClick={() => openLightbox("/fufootea-may-menu.png")}
+              />
             </figure>
             <figure className="card">
-              <img className="menu-img" src="assets/menu2.webp" alt="Fufootea 现烤泡芙与原茶生鲜果蛋糕价目" />
+              <Image
+                src="/placeholder.svg?height=800&width=600"
+                alt="Fufootea 现烤泡芙与原茶生鲜果蛋糕价目"
+                width={600}
+                height={800}
+                className="w-full h-auto cursor-zoom-in"
+                onClick={() => openLightbox("/placeholder.svg?height=800&width=600")}
+              />
             </figure>
           </div>
         </section>
 
-        {/* Locations */}
-        <section id="locations" className="container" aria-labelledby="loc-title">
-          <div className="sec-head">
-            <h2 id="loc-title">
-              <span data-lang="zh">门店与时间</span>
-              <span data-lang="en" hidden>
-                Locations &amp; Hours
-              </span>
+        <section id="locations" className="py-12 md:py-18 container mx-auto px-4">
+          <div className="mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold font-serif">
+              <T zh="门店与时间" en="Locations & Hours" />
             </h2>
           </div>
-
-          <div className="loc-grid">
-            <article className="card loc" aria-label="Mount Austin 总店">
-              <img className="loc-visual" src="assets/austin.webp" alt="Fufootea Mount Austin 门店" loading="lazy" />
-              <div className="meta">
-                <h3>Mount Austin · 总店</h3>
-                <div className="muted">
-                  <span data-lang="zh">
-                    地址：11, Jln Austin Height 7/2, Taman Mount Austin, 81100 Johor Bahru, Johor
-                    <br />
-                    营业时间：每日 12:00–24:00（12pm–12am）
-                  </span>
-                  <span data-lang="en" hidden>
-                    Address: 11, Jalan Austin Height 7/2, Taman Mount Austin, 81100 Johor Bahru, Johor
-                    <br />
-                    Hours: Daily 12:00–24:00 (12pm–12am)
-                  </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <article className="card flex flex-col">
+              <Image
+                src="/placeholder.svg?height=300&width=400"
+                alt="Fufootea Mount Austin 门店"
+                width={400}
+                height={300}
+                className="w-full aspect-[4/3] object-cover border-b border-gray-200 cursor-zoom-in"
+                onClick={() => openLightbox("/placeholder.svg?height=300&width=400")}
+              />
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="font-semibold mb-2">Mount Austin · 总店</h3>
+                <div className="text-gray-600 text-sm mb-4 flex-1">
+                  <T
+                    zh="地址：11, Jln Austin Height 7/2, Taman Mount Austin, 81100 Johor Bahru, Johor<br/>营业时间：每日 12:00–24:00（12pm–12am）"
+                    en="Address: 11, Jalan Austin Height 7/2, Taman Mount Austin, 81100 Johor Bahru, Johor<br/>Hours: Daily 12:00–24:00 (12pm–12am)"
+                  />
                 </div>
-                <div className="loc-actions">
-                  <a className="btn" href="https://maps.app.goo.gl/TwqN4NqPGLLrpr8q9?g_st=ipc" target="_blank" rel="noopener noreferrer">
-                    <span data-lang="zh">一键导航</span>
-                    <span data-lang="en" hidden>
-                      One-tap directions
-                    </span>
+                <div className="flex gap-2 mt-auto">
+                  <a
+                    className="inline-flex items-center gap-2 px-4 py-3 rounded-full font-semibold border border-gray-200 transition-all duration-200 hover:-translate-y-0.5"
+                    href="https://maps.app.goo.gl/TwqN4NqPGLLrpr8q9?g_st=ipc"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <T zh="一键导航" en="One‑tap directions" />
                   </a>
                 </div>
               </div>
             </article>
-
-            <article className="card loc" aria-label="Paradigm Mall JB 分店">
-              <img className="loc-visual" src="assets/paradigm.webp" alt="Fufootea Paradigm Mall JB 门店" loading="lazy" />
-              <div className="meta">
-                <h3>Paradigm Mall JB · L3（Lot 12E–H）</h3>
-                <div className="muted">
-                  <span data-lang="zh">
-                    地址：Paradigm Mall Johor Bahru，Level 3 · Lot 12E–H（近溜冰场）
-                    <br />
-                    营业时间：每日 10:00–22:00（10am–10pm）
-                  </span>
-                  <span data-lang="en" hidden>
-                    Address: Paradigm Mall Johor Bahru, Level 3 · Lot 12E–H (near ice rink)
-                    <br />
-                    Hours: Daily 10:00–22:00 (10am–10pm)
-                  </span>
+            <article className="card flex flex-col">
+              <Image
+                src="/placeholder.svg?height=300&width=400"
+                alt="Fufootea Paradigm Mall JB 门店"
+                width={400}
+                height={300}
+                className="w-full aspect-[4/3] object-cover border-b border-gray-200 cursor-zoom-in"
+                onClick={() => openLightbox("/placeholder.svg?height=300&width=400")}
+              />
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="font-semibold mb-2">Paradigm Mall JB · L3（Lot 12E–H）</h3>
+                <div className="text-gray-600 text-sm mb-4 flex-1">
+                  <T
+                    zh="地址：Paradigm Mall Johor Bahru，Level 3 · Lot 12E–H（近溜冰场）<br/>营业时间：每日 10:00–22:00（10am–10pm）"
+                    en="Address: Paradigm Mall Johor Bahru, Level 3 · Lot 12E–H (near ice rink)<br/>Hours: Daily 10:00–22:00 (10am–10pm)"
+                  />
                 </div>
-                <div className="loc-actions">
-                  <a className="btn" href="https://maps.app.goo.gl/jRpvqj6F4kZiAxpy7?g_st=ipc" target="_blank" rel="noopener noreferrer">
-                    <span data-lang="zh">一键导航</span>
-                    <span data-lang="en" hidden>
-                      One-tap directions
-                    </span>
+                <div className="flex gap-2 mt-auto">
+                  <a
+                    className="inline-flex items-center gap-2 px-4 py-3 rounded-full font-semibold border border-gray-200 transition-all duration-200 hover:-translate-y-0.5"
+                    href="https://maps.app.goo.gl/jRpvqj6F4kZiAxpy7?g_st=ipc"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <T zh="一键导航" en="One‑tap directions" />
                   </a>
                 </div>
               </div>
@@ -517,101 +431,141 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Reviews */}
-        <section className="container" aria-labelledby="rev-title">
-          <h2 id="rev-title">
-            <span data-lang="zh">大家怎么说</span>
-            <span data-lang="en" hidden>
-              What People Say
-            </span>
+        <section className="py-12 md:py-18 container mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold font-serif mb-6">
+            <T zh="大家怎么说" en="What People Say" />
           </h2>
-          <div className="quotes">
-            <blockquote>“真材实料，水果香气很干净。”</blockquote>
-            <blockquote>“内装极简有质感，出片好看。”</blockquote>
-            <blockquote>“榴莲泡芙爆浆，太上头了。”</blockquote>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <blockquote className="m-0 p-4 border border-gray-200 rounded-2xl italic">
+              "真材实料，水果香气很干净。"
+            </blockquote>
+            <blockquote className="m-0 p-4 border border-gray-200 rounded-2xl italic">
+              "内装极简有质感，出片好看。"
+            </blockquote>
+            <blockquote className="m-0 p-4 border border-gray-200 rounded-2xl italic">
+              "榴莲泡芙爆浆，太上头了。"
+            </blockquote>
           </div>
         </section>
 
-        {/* Social */}
-        <section id="instagram" className="container" aria-labelledby="ig-title">
-          <div className="sec-head">
-            <h2 id="ig-title">
-              <span data-lang="zh">社交媒体</span>
-              <span data-lang="en" hidden>
-                Social Media
-              </span>
+        <section id="instagram" className="py-12 md:py-18 container mx-auto px-4">
+          <div className="flex items-end justify-between gap-3 mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold font-serif">
+              <T zh="社交媒体" en="Social Media" />
             </h2>
           </div>
-
-          <div className="ig-grid" id="ig-grid" aria-live="polite">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <a
-              className="ig-card"
+              className="relative aspect-square rounded-2xl overflow-hidden border border-gray-200 bg-gradient-to-br from-black/5 to-black/10"
               href="https://www.xiaohongshu.com/discovery/item/67724328000000001300cc8a?source=webshare&xhsshare=pc_web&xsec_token=ABTLYT3aVuy8Oi2x3U7821Mp1rALTvuIKGBZeu3FqmlqY=&xsec_source=pc_share"
               target="_blank"
-              rel="noopener noreferrer"
-              aria-label="小红书 · 被JB奶茶店耽误的泡芙"
+              rel="noreferrer noopener"
             >
-              <span className="ig-badge">小红书</span>
-              <img src="assets/xhs1.png" alt="小红书 帖子 1" />
+              <span className="absolute right-2 top-2 bg-black/55 text-white rounded-full px-2 py-1 text-xs font-bold">
+                小红书
+              </span>
+              <Image
+                src="/placeholder.svg?height=300&width=300"
+                alt="小红书 帖子 1"
+                width={300}
+                height={300}
+                className="w-full h-full object-cover"
+              />
             </a>
-
             <a
-              className="ig-card"
+              className="relative aspect-square rounded-2xl overflow-hidden border border-gray-200 bg-gradient-to-br from-black/5 to-black/10"
               href="https://www.instagram.com/reel/DNFPywJzzBZ/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
               target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram Reels"
+              rel="noreferrer noopener"
             >
-              <span className="ig-badge">Instagram</span>
-              <img src="assets/Ins1.png" alt="Instagram Reels" />
+              <span className="absolute right-2 top-2 bg-black/55 text-white rounded-full px-2 py-1 text-xs font-bold">
+                Instagram
+              </span>
+              <Image
+                src="/placeholder.svg?height=300&width=300"
+                alt="Instagram Reels"
+                width={300}
+                height={300}
+                className="w-full h-full object-cover"
+              />
             </a>
-
             <a
-              className="ig-card"
+              className="relative aspect-square rounded-2xl overflow-hidden border border-gray-200 bg-gradient-to-br from-black/5 to-black/10"
               href="https://www.xiaohongshu.com/discovery/item/687a090c00000000120306fb?source=webshare&xhsshare=pc_web&xsec_token=ABxmSeK7CxGEF_r8WNVLUDg80FsuKSretTHJfmsdmTnMY=&xsec_source=pc_share"
               target="_blank"
-              rel="noopener noreferrer"
-              aria-label="小红书 · JB周末亲子出游好去处"
+              rel="noreferrer noopener"
             >
-              <span className="ig-badge">小红书</span>
-              <img src="assets/xhs2.png" alt="小红书 帖子 2" />
+              <span className="absolute right-2 top-2 bg-black/55 text-white rounded-full px-2 py-1 text-xs font-bold">
+                小红书
+              </span>
+              <Image
+                src="/placeholder.svg?height=300&width=300"
+                alt="小红书 帖子 2"
+                width={300}
+                height={300}
+                className="w-full h-full object-cover"
+              />
             </a>
           </div>
         </section>
 
-        {/* Contact moved below Social Media */}
-        <section id="contact" className="container" aria-labelledby="contact-title">
-          <div className="sec-head">
-            <h2 id="contact-title">
-              <span data-lang="zh">订阅与联系</span>
-              <span data-lang="en" hidden>
-                Subscribe &amp; Contact
-              </span>
+        <section id="contact" className="py-12 md:py-18 container mx-auto px-4 mb-4">
+          <div className="flex items-end justify-between gap-3 mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold font-serif">
+              <T zh="订阅与联系" en="Subscribe & Contact" />
             </h2>
-            <div className="muted">获取当季限定与新品试饮</div>
+            <div className="text-gray-600 text-sm">获取当季限定与新品试饮</div>
           </div>
-
-          <form className="newsletter" name="subscribe">
-            <input type="hidden" name="form-name" value="subscribe" />
-            <input aria-label="邮箱" type="email" name="email" placeholder="Coming soon" disabled />
-            <button className="btn" type="button" disabled>
+          <form className="flex gap-2 flex-wrap">
+            <input
+              type="email"
+              placeholder="Coming soon"
+              disabled
+              className="flex-1 min-w-[220px] px-4 py-3 rounded-full border border-gray-200 bg-transparent"
+            />
+            <button
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-full font-semibold border border-gray-200 transition-all duration-200 hover:-translate-y-0.5"
+              type="button"
+              disabled
+            >
               Subscribe
             </button>
-            <a className="btn" href="https://wa.me/60136041491" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp 联系我们">
+            <a
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-full font-semibold border border-gray-200 transition-all duration-200 hover:-translate-y-0.5"
+              href="https://wa.me/60136041491"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
               WhatsApp
             </a>
           </form>
         </section>
       </main>
 
-      {/* Simple footer with dynamic year target for script */}
-      <footer>
-        <div className="container">
-          <small>
-            © <span id="y"></span> Fufootea · All Rights Reserved.
-          </small>
+      <footer className="border-t border-gray-200 py-7 text-sm">
+        <div className="container mx-auto px-4 flex items-center justify-between gap-4">
+          <div className="flex gap-4 items-center">
+            <a href="#hero">品牌故事</a>
+            <a href="#menu">菜单</a>
+            <a href="#locations">门店</a>
+            <a href="#contact">联系</a>
+            <span className="text-gray-600">© 2025 Fufootea. Fivante Tech. All Rights Reserved.</span>
+          </div>
         </div>
       </footer>
+
+      {/* Lightbox */}
+      {lightboxSrc && (
+        <div className="lightbox" aria-hidden="false" onClick={closeLightbox}>
+          <Image
+            src={lightboxSrc || "/placeholder.svg"}
+            alt="Enlarged view"
+            width={800}
+            height={600}
+            className="max-w-[94vw] max-h-[90vh] rounded-2xl"
+          />
+        </div>
+      )}
     </>
-  );
+  )
 }
