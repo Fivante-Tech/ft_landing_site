@@ -1,27 +1,21 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { CartProvider } from "@/contexts/cart-context"
-
-const inter = Inter({ subsets: ["latin"] })
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fufootea - Premium Fruit Tea Experience",
-  description: "Discover our premium collection of handcrafted fruit teas made with the finest natural ingredients.",
-    generator: 'v0.dev'
-}
+  title: "Fufootea \u8336\u6ee1\u6ee1\uff5cBe Real to Fruits & Tea",
+  description: "Fufootea \u8336\u6ee1\u6ee1 \u2014 Malaysia local brand, the finest handcrafted tea. Muslim-friendly. Mount Austin & Paradigm Mall JB.",
+  icons: { icon: "/favicon.ico" },
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <CartProvider>{children}</CartProvider>
-      </body>
+    <html lang="zh-Hans">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&family=Playfair+Display:wght@400..800&display=swap" rel="stylesheet" />
+      </head>
+      <body>{children}</body>
     </html>
-  )
+  );
 }
