@@ -1,21 +1,36 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter, Playfair_Display } from "next/font/google"
+import "./globals.css"
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+})
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-playfair",
+  weight: ["400", "600", "700", "800"],
+})
 
 export const metadata: Metadata = {
-  title: "Fufootea \u8336\u6ee1\u6ee1\uff5cBe Real to Fruits & Tea",
-  description: "Fufootea \u8336\u6ee1\u6ee1 \u2014 Malaysia local brand, the finest handcrafted tea. Muslim-friendly. Mount Austin & Paradigm Mall JB.",
-  icons: { icon: "/favicon.ico" },
-};
+  title: "Fufootea 茶满满｜Be Real to Fruits & Tea",
+  description:
+    "Fufootea 茶满满 — Malaysia local brand, the finest handcrafted tea. Muslim-friendly. Mount Austin & Paradigm Mall JB.",
+    generator: 'v0.app'
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
-    <html lang="zh-Hans">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&family=Playfair+Display:wght@400..800&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="zh-Hans" className={`${inter.variable} ${playfair.variable} antialiased`}>
       <body>{children}</body>
     </html>
-  );
+  )
 }
