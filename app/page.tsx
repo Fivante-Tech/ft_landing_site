@@ -1,441 +1,214 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Star, Heart, Award, Phone, Mail, MapPin } from "lucide-react"
-import { CartProvider, useCart } from "@/contexts/cart-context"
-import { CartIcon } from "@/components/cart"
+import { useEffect } from "react";
 
-function ProductCard({ product }: { product: any }) {
-  const { dispatch } = useCart()
+export default function Page() {
+  useEffect(() => {
+    // ---- Mounted from your original inline scripts ----
+    try {
+      // DEBUG FIX: ensure #y exists before writing, prevents TypeError
+          var yel = document.getElementById('y'); if (yel) { yel.textContent = new Date().getFullYear(); }
+          (function(){
+            const KEY='lang';
+            const show=(lang)=>{
+              document.querySelectorAll('[data-lang]').forEach(el=>{
+                const on = el.getAttribute('data-lang')===lang;
+                el.hidden = !on;
+                if(on) el.style.removeProperty('display');
+              });
+              localStorage.setItem(KEY, lang);
+              const hero = document.getElementById('hero');
+              if (hero) hero.scrollIntoView({behavior:'smooth', block:'start'});
+            };
+            const s=localStorage.getItem(KEY)||'zh';
+            show(s);
+            document.getElementById('lang-zh')?.addEventListener('click',()=>show('zh'));
+            document.getElementById('lang-en')?.addEventListener('click',()=>show('en'));
+          })();
+          (function(){const lb=document.createElement('div');lb.className='lightbox';lb.setAttribute('aria-hidden','true');lb.innerHTML='<img alt="menu enlarged" />';document.body.appendChild(lb);const img=lb.querySelector('img');document.querySelectorAll('.menu-img, .seasonal-carousel img, .hero-bento img, .loc-visual').forEach(el=>{el.style.cursor='zoom-in';el.addEventListener('click',()=>{img.src=el.src;lb.setAttribute('aria-hidden','false');});});lb.addEventListener('click',()=>{lb.setAttribute('aria-hidden','true');img.src='';});})();
+          // Lightbox support for Hero cover background
+          (function(){
+            const lb=document.querySelector('.lightbox');
+            const img=lb && lb.querySelector('img');
+            const el=document.querySelector('.hero-stage');
+            if(!lb || !img || !el) return;
+            el.style.cursor='zoom-in';
+            el.addEventListener('click',()=>{
+              const v=getComputedStyle(el).getPropertyValue('--hero');
+              const m=v && v.match(/url\((?:['\"])??(.*?)(?:['\"])??\)/);
+              if(m){ img.src=m[1]; lb.setAttribute('aria-hidden','false'); }
+            });
+          })();
 
-  const addToCart = () => {
-    dispatch({
-      type: "ADD_ITEM",
-      payload: {
-        id: product.name.toLowerCase().replace(/\s+/g, "-"),
-        name: product.name,
-        price: Number.parseFloat(product.price.replace("$", "")),
-        image: product.image,
-      },
-    })
-  }
+          (function(){
+            const scroller = document.getElementById('seasonal-scroller');
+            const prev = document.getElementById('seasonal-prev');
+            const next = document.getElementById('seasonal-next');
+            const progress = document.getElementById('seasonal-progress');
+            const dotsWrap = document.getElementById('seasonal-dots');
+            if(!scroller) return;
+            const slides = Array.from(scroller.querySelectorAll('.slide'));
+            slides.forEach((_,i)=>{ const d=document.createElement('button'); d.className='dot'; d.setAttribute('aria-label','第'+(i+1)+'张'); d.addEventListener('click', ()=>go(i)); dotsWrap.appendChild(d);});
+            let idx = 0; let timer=null; const DURATION=5000;
+            function update(){ dotsWrap.querySelectorAll('.dot').forEach((d,i)=> d.setAttribute('aria-current', i===idx?'true':'false')); }
+            function go(i){ idx = (i+slides.length)%slides.length; const step = scroller.clientWidth * 1; scroller.scrollTo({left: idx*step, behavior:'smooth'}); restart(); update(); }
+            function restart(){ progress.style.transition='none'; progress.style.width='0%'; requestAnimationFrame(()=>{requestAnimationFrame(()=>{ progress.style.transition = `width ${DURATION}ms linear`; progress.style.width='100%'; })}); clearInterval(timer); timer = setInterval(()=>{ go(idx+1); }, DURATION); }
+            prev?.addEventListener('click', ()=> go(idx-1));
+            next?.addEventListener('click', ()=> go(idx+1));
+            scroller.addEventListener('pointerdown', ()=>{ clearInterval(timer); });
+            scroller.addEventListener('pointerup', ()=>{ restart(); });
+            window.addEventListener('resize', ()=>{ go(idx); });
+            update(); restart();
+          })();
 
-  return (
-    <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
-      <CardHeader className="p-0">
-        <div className="relative overflow-hidden rounded-t-lg">
-          <Image
-            src={product.image || "/placeholder.svg"}
-            alt={product.name}
-            width={300}
-            height={300}
-            className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          <Badge className="absolute top-4 left-4 bg-green-600">{product.badge}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="p-6">
-        <CardTitle className="text-xl mb-2">{product.name}</CardTitle>
-        <CardDescription className="text-gray-600 mb-4">{product.description}</CardDescription>
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold text-green-600">{product.price}</span>
-          <div className="flex items-center space-x-1">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm text-gray-600">{product.rating}</span>
-          </div>
-        </div>
-        
-      </CardContent>
-    </Card>
-  )
-}
+          // Instagram latest 3 (static placeholders)
+          (function(){
+            const grid = document.getElementById('ig-grid');
+            if(!grid) return;
+            // already rendered via HTML; keep for safety if JS reloads the grid elsewhere
+          })();
 
-export default function FruitTeaWebsite() {
-  return (
-    <CartProvider>
-      <FruitTeaContent />
-    </CartProvider>
-  )
-}
-
-function FruitTeaContent() {
-  // Move all the existing content here and use ProductCard in the products section
-  const products = [
-    {
-      name: "Tropical Paradise",
-      description: "Mango, pineapple, and passion fruit blend",
-      price: "$4.99",
-      rating: 4.9,
-      image: "/placeholder.svg?height=300&width=300",
-      badge: "Best Seller",
-    },
-    {
-      name: "Berry Bliss",
-      description: "Mixed berries with hibiscus and mint",
-      price: "$4.49",
-      rating: 4.8,
-      image: "/placeholder.svg?height=300&width=300",
-      badge: "New",
-    },
-    {
-      name: "Citrus Burst",
-      description: "Orange, lemon, and grapefruit infusion",
-      price: "$4.29",
-      rating: 4.7,
-      image: "/placeholder.svg?height=300&width=300",
-      badge: "Refreshing",
-    },
-    {
-      name: "Peach Serenity",
-      description: "Sweet peach with chamomile and honey",
-      price: "$4.79",
-      rating: 4.9,
-      image: "/placeholder.svg?height=300&width=300",
-      badge: "Calming",
-    },
-    {
-      name: "Apple Cinnamon",
-      description: "Crisp apple with warming cinnamon spice",
-      price: "$4.39",
-      rating: 4.6,
-      image: "/placeholder.svg?height=300&width=300",
-      badge: "Seasonal",
-    },
-    {
-      name: "Dragon Fruit Delight",
-      description: "Exotic dragon fruit with lychee notes",
-      price: "$5.29",
-      rating: 4.8,
-      image: "/placeholder.svg?height=300&width=300",
-      badge: "Premium",
-    },
-  ]
+          // --- Self-tests (console) ---
+          (function(){
+            function assert(cond, name){ console[cond? 'log':'error']('[test]', name, cond? 'OK':'FAIL'); }
+            assert(!!document.getElementById('y'), 'year span exists');
+            assert(document.querySelectorAll('.lang').length===2, 'language buttons x2');
+            assert(document.querySelectorAll('#locations [data-lang]').length>=4, 'bilingual location fields');
+            assert(document.querySelectorAll('#seasonal-scroller .slide').length===5, 'seasonal has 5 slides');
+          })();
+    } catch (e) {
+      console.error("[init scripts] error:", e);
+    }
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-orange-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm sticky top-0 z-50 border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Image src="/images/fufootea-logo.png" alt="Fufootea" width={120} height={40} className="h-10 w-auto" />
-          </div>
-          <nav className="hidden md:flex space-x-6">
-            <Link href="#home" className="text-gray-700 hover:text-green-600 transition-colors">
-              Home
-            </Link>
-            <Link href="#products" className="text-gray-700 hover:text-green-600 transition-colors">
-              Products
-            </Link>
-            <Link href="#promotions" className="text-gray-700 hover:text-green-600 transition-colors">
-              Promotions
-            </Link>
-            <Link href="#about" className="text-gray-700 hover:text-green-600 transition-colors">
-              About
-            </Link>
-            <Link href="#contact" className="text-gray-700 hover:text-green-600 transition-colors">
-              Contact
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <CartIcon />
-            
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section id="home" className="py-20 px-4">
-        <div className="container mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-800 mb-6">
-            Fresh <span className="text-green-600">Fruit</span> Tea
-            <br />
-            <span className="text-orange-500">Experience</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Discover our premium collection of handcrafted fruit teas made with the finest natural ingredients. Refreshing, healthy, and bursting with flavor.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-lg px-8 py-3">
-              Explore Menu
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-lg px-8 py-3 border-green-600 text-green-600 hover:bg-green-50 bg-transparent"
-            >
-              View Promotions
-            </Button>
-          </div>
-          <div className="relative max-w-4xl mx-auto">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/493864951_122155537346441974_1586368821575391203_n.jpg-QQbCgDsjUugHILS4KnET3KtfVTyv6G.jpeg"
-              alt="Fufootea Menu - Seasonal Fruit & Vegetable Tea Collection"
-              width={800}
-              height={400}
-              className="rounded-2xl shadow-2xl object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section id="products" className="py-20 px-4 bg-white">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Our Signature Blends</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Each tea is carefully crafted with premium fruits and natural ingredients for the perfect taste
-              experience.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product, index) => (
-              <ProductCard key={index} product={product} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Promotions */}
-      <section id="promotions" className="py-20 px-4 bg-gradient-to-r from-orange-100 to-green-100">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Special Promotions</h2>
-            <p className="text-xl text-gray-600">Limited time offers you don't want to miss!</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-xl">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-4">
-                  <Heart className="h-8 w-8 mr-3" />
-                  <Badge variant="secondary" className="bg-white text-green-600">
-                    Limited Time
-                  </Badge>
-                </div>
-                <h3 className="text-3xl font-bold mb-4">Buy 2 Get 1 Free</h3>
-                <p className="text-green-100 mb-6 text-lg">
-                  Mix and match any of our signature fruit teas. Perfect for sharing with friends or stocking up on your
-                  favorites.
-                </p>
-                
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-xl">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-4">
-                  <Award className="h-8 w-8 mr-3" />
-                  <Badge variant="secondary" className="bg-white text-orange-600">
-                    New Customer
-                  </Badge>
-                </div>
-                <h3 className="text-3xl font-bold mb-4">20% Off First Order</h3>
-                <p className="text-orange-100 mb-6 text-lg">
-                  Welcome to FreshTea! Enjoy 20% off your first order when you sign up for our newsletter.
-                </p>
-                
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-12 text-center">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg max-w-2xl mx-auto">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">Loyalty Program</h3>
-                <p className="text-gray-600 mb-6">
-                  Join our FreshTea Rewards program and earn points with every purchase. Redeem points for free drinks,
-                  exclusive flavors, and special discounts.
-                </p>
-                
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-20 px-4 bg-white">
-        <div className="container mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold text-gray-800 mb-6">Our Story</h2>
-              <p className="text-lg text-gray-600 mb-6 text-justify">
-                {"FufooTea is a proudly Malaysian local brand, dedicated to serving the finest handcrafted tea — brewed with honesty, heart, and real ingredients. We believe in keeping it real: real fruits, real tea, and real passion in every cup. 🍵✨\n\nFrom our very first blend, we’ve stayed true to our roots — creating refreshing, feel-good drinks that celebrate the simplicity of natural flavors and the joy of sharing good tea with good people.\n\nWelcome to FufooTea. Stay real, sip happy. 💛"}
-              </p>
-              
-              <div className="grid grid-cols-3 gap-6 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-green-600 mb-2">50K+</div>
-                  <div className="text-gray-600">Happy Customers</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-green-600 mb-2">25+</div>
-                  <div className="text-gray-600">Unique Flavors</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-green-600 mb-2">100%</div>
-                  <div className="text-gray-600">Natural Ingredients</div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <Image
-                src="/placeholder.svg?height=500&width=600"
-                alt="Tea preparation process"
-                width={600}
-                height={500}
-                className="rounded-2xl shadow-xl"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-20 px-4 bg-gray-50">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Get In Touch</h2>
-            <p className="text-xl text-gray-600">We'd love to hear from you. Visit us or reach out online!</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="p-8">
-                <Phone className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Call Us</h3>
-                <p className="text-gray-600">+60 13-604 1491</p>
-                <p className="text-sm text-gray-500 mt-2">Mon-Fri 9AM-8PM</p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="p-8">
-                <Mail className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Email Us</h3>
-                <p className="text-gray-600">fufootea@gmail.com</p>
-                <p className="text-sm text-gray-500 mt-2">We reply within 24 hours</p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="p-8">
-                <MapPin className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Visit Us</h3>
-                <p className="text-gray-600">{"📍Austin Branch, 12pm-12am\n11 jalan austin heights 7/2 taman mount austin \n\n📍Paradigm Mall, 10am-10pm\nLot 3FK-12E, F-H (level3)"}</p>
-                <p className="text-gray-600">Fresh City, FC 12345</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12 px-4">
-        <div className="container mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="mb-4">
-                <Image
-                  src="/images/fufootea-logo.png"
-                  alt="Fufootea"
-                  width={120}
-                  height={40}
-                  className="h-10 w-auto brightness-0 invert"
-                />
-              </div>
-              <p className="text-gray-400">Premium fruit teas crafted with love and the finest natural ingredients.</p>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="#home" className="hover:text-green-400 transition-colors">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#products" className="hover:text-green-400 transition-colors">
-                    Products
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#promotions" className="hover:text-green-400 transition-colors">
-                    Promotions
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#about" className="hover:text-green-400 transition-colors">
-                    About
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Customer Care</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="#" className="hover:text-green-400 transition-colors">
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-green-400 transition-colors">
-                    Shipping Info
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-green-400 transition-colors">
-                    Returns
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#contact" className="hover:text-green-400 transition-colors">
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
-              <p className="text-gray-400 mb-4">Stay updated with our latest flavors and offers!</p>
-              <div className="flex space-x-4">
-                <Link href="https://www.facebook.com/fufootea" target="_blank" rel="noopener noreferrer">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-gray-600 text-gray-400 hover:text-green-400 hover:border-green-400 bg-transparent"
-                  >
-                    Facebook
-                  </Button>
-                </Link>
-                <Link href="https://www.instagram.com/fufootea/" target="_blank" rel="noopener noreferrer">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-gray-600 text-gray-400 hover:text-green-400 hover:border-green-400 bg-transparent"
-                  >
-                    Instagram
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 FreshTea. All rights reserved. Made with ❤️ for tea lovers.</p>
-          </div>
-        </div>
-      </footer>
+    <>
+      <header>
+  <div className="container nav" role="navigation" aria-label="主导航">
+    <div className="brand"><div className="brandname">Fufootea 茶满满</div>
     </div>
-  )
+    <nav className="nav" aria-label="页面链接">
+      <ul>
+        <li><a href="#hero"><span data-lang="zh">品牌故事</span><span data-lang="en" hidden>Story</span></a></li>
+        <li><a href="#menu"><span data-lang="zh">菜单</span><span data-lang="en" hidden>Menu</span></a></li>
+        <li><a href="#locations"><span data-lang="zh">门店</span><span data-lang="en" hidden>Locations</span></a></li>
+        <li><a href="#contact"><span data-lang="zh">联系</span><span data-lang="en" hidden>Contact</span></a></li>
+      </ul>
+    </nav>
+    <div className="nav-cta lang-switch">
+      <button id="lang-zh" className="lang" aria-label="切换中文" title="中文">中</button>
+      <button id="lang-en" className="lang" aria-label="Switch to English" title="EN">EN</button>
+    </div>
+  </div>
+</header>
+      <main id="main">
+  <section id="hero" className="hero container" aria-label="首屏宣传">
+    <div className="grid">
+      <div>
+        <div className="badge" aria-label="穆斯林友好">#MuslimFriendly</div>
+        <div className="badge" aria-label="本地品牌">#localbrand</div>
+        <h1 className="display"><span data-lang="zh">好茶·不将就·</span><span data-lang="en" hidden>Be Real to Fruits & Tea</span></h1>
+        <p className="sub muted"><span data-lang="en">FufooTea is a proudly Malaysian local brand, dedicated to serving the finest handcrafted tea — brewed with honesty, heart, and real ingredients. We believe in keeping it real: real fruits, real tea, and real passion in every cup. 🍵✨ From our very first blend, we’ve stayed true to our roots — creating refreshing, feel-good drinks that celebrate the simplicity of natural flavors and the joy of sharing good tea with good people. Welcome to FufooTea. Stay real, sip happy. 💛</span><span data-lang="zh" hidden>FufooTea 源自马来西亚的本地品牌，专注于奉上用心手作的好茶——以诚意、温度与真材实料酿煮而成。我们坚持真实：每一杯都是真水果、真茶叶，也是真热爱。自第一杯调配起，我们始终不忘初心——以自然而单纯的风味，做让人身心舒畅的好喝饮品，与爱茶的你分享美好。欢迎来到 FufooTea，保持真实，畅快喝茶。💛</span></p>
+      </div>
+      <div className="hero-stage" aria-label="品牌视觉背景" style={ ["--hero"]:"url('assets/Cover.jpg')" }></div>
+      </div>
+    </div>
+  </section>
+
+  <section className="container" aria-labelledby="sig">
+    <div className="sec-head">
+      <h2 id="sig"><span data-lang="zh">招牌单品</span><span data-lang="en" hidden>Signatures</span></h2>
+      <a className="btn" href="#menu"><span data-lang="zh">全部饮品 →</span><span data-lang="en" hidden>All Drinks →</span></a>
+    </div>
+    <div className="grid grid-3">
+      <article className="card drink" aria-label="Pekan Nanas"><img className="drink-visual" src="assets/2.jpg" alt="Pekan Nanas 主图" /><div className="meta"><h3><span data-lang="zh">北干那那 · 凤梨</span><span data-lang="en" hidden>Pekan Nanas · Pineapple</span></h3><div className="price">MYR 11.99</div></div></article>
+      <article className="card drink" aria-label="Prosperity Persimmon Peanut"><img className="drink-visual" src="assets/3.jpg" alt="Prosperity Persimmon Peanut 主图" /><div className="meta"><h3><span data-lang="zh">好柿花生</span><span data-lang="en" hidden>Prosperity · Persimmon Peanut</span></h3><div className="price">MYR 11.99</div></div></article>
+      <article className="card drink" aria-label="Nasi Lemak Bungkus"><img className="drink-visual" src="assets/1.jpg" alt="Nasi Lemak Bungkus 主图" /><div className="meta"><h3><span data-lang="zh">椰浆饭 · 套袋款</span><span data-lang="en" hidden>Nasi Lemak · Bungkus</span></h3><div className="price">MYR 11.99</div></div></article>
+    </div>
+  </section>
+
+  <section className="container" aria-labelledby="usps">
+    <h2 id="usps"><span data-lang="zh">为什么选我们</span><span data-lang="en" hidden>Why Us</span></h2>
+    <div className="usps">
+      <div className="usp"><div aria-hidden="true">🥭</div><div><strong><span data-lang="zh">真果 · 真茶 · 真奶</span><span data-lang="en" hidden>Real Fruits · Real Tea · Real Milk</span></strong><div className="muted"><span data-lang="zh">拒绝人工香精，用料满满</span><span data-lang="en" hidden>No artificial flavors, only honest ingredients.</span></div></div></div>
+      <div className="usp"><div aria-hidden="true">🍍</div><div><strong><span data-lang="zh">产地当季</span><span data-lang="en" hidden>Seasonal & Sourced</span></strong><div className="muted"><span data-lang="zh">Pekan Nanas 凤梨、西瓜等季节风味</span><span data-lang="en" hidden>Pekan Nanas pineapples, watermelon and other seasonal flavors.</span></div></div></div>
+      <div className="usp"><div aria-hidden="true">⚖️</div><div><strong><span data-lang="zh">糖冰可定制</span><span data-lang="en" hidden>Custom Sugar & Ice</span></strong><div className="muted"><span data-lang="zh">0–100% 糖度与冰量，随心口味</span><span data-lang="en" hidden>0–100% sugar and ice — your call.</span></div></div></div>
+    </div>
+  </section>
+
+  <section className="container seasonal-carousel" aria-labelledby="seasonal-title">
+    <div className="sec-head">
+      <h2 id="seasonal-title"><span data-lang="zh">当季限定</span><span data-lang="en" hidden>Seasonal Limited</span></h2>
+    </div>
+    <div className="progress-wrap" aria-hidden="true"><div id="seasonal-progress" className="progress"></div></div>
+    <div className="carousel" id="seasonal-scroller" aria-label="季节限定主图轮播">
+      <figure className="slide card"><img src="assets/season1.webp" alt="Camellia Oolong Milk Tea 海报" /><figcaption className="cap">Camellia Oolong · 山茶花海</figcaption></figure>
+      <figure className="slide card"><img src="assets/season2.webp" alt="Da Hong Pao Milk Tea 海报" /><figcaption className="cap">Da Hong Pao · 一袭红袍</figcaption></figure>
+      <figure className="slide card"><img src="assets/season3.webp" alt="Autumn Black Milk Tea 海报" /><figcaption className="cap">Autumn Black · 如烟知秋</figcaption></figure>
+      <figure className="slide card"><img src="assets/season4.webp" alt="White Peach Oolong Milk Tea 海报" /><figcaption className="cap">White Peach Oolong · 陌上白桃</figcaption></figure>
+      <figure className="slide card"><img src="assets/season5.webp" alt="Jasmine Green Milk Tea 海报" /><figcaption className="cap">Jasmine Green · 悠悠茉绿</figcaption></figure>
+    </div>
+    <div className="carousel-controls">
+      <div className="dots" id="seasonal-dots" aria-label="轮播定位点"></div>
+      <button className="btn" id="seasonal-prev" aria-label="上一张">‹</button>
+      <button className="btn" id="seasonal-next" aria-label="下一张">›</button>
+    </div>
+  </section>
+
+  <section id="menu" className="container" aria-labelledby="menu-title">
+    <div className="sec-head"><h2 id="menu-title"><span data-lang="zh">菜单</span><span data-lang="en" hidden>Menu</span></h2><div className="muted"><span data-lang="zh">可点击放大查看，依据当季更新</span><span data-lang="en" hidden>Tap to zoom. Seasonal updates.</span></div></div>
+    <div className="menu-gallery"><figure className="card"><img className="menu-img" src="assets/menu1.webp" alt="Fufootea 五月菜单（果蔬茶、鲜奶茶、纯茶、草本茶与糖冰标准）" /></figure><figure className="card"><img className="menu-img" src="assets/menu2.webp" alt="Fufootea 现烤泡芙与原茶生鲜果蛋糕价目" /></figure></div>
+  </section>
+
+  <section id="locations" className="container" aria-labelledby="loc-title">
+    <div className="sec-head"><h2 id="loc-title"><span data-lang="zh">门店与时间</span><span data-lang="en" hidden>Locations &amp; Hours</span></h2></div>
+    <div className="loc-grid">
+      <article className="card loc" aria-label="Mount Austin 总店">
+        <img className="loc-visual" src="assets/austin.webp" alt="Fufootea Mount Austin 门店" loading="lazy" />
+        <div className="meta"><h3>Mount Austin · 总店</h3>
+          <div className="muted">
+            <span data-lang="zh">地址：11, Jln Austin Height 7/2, Taman Mount Austin, 81100 Johor Bahru, Johor<br>营业时间：每日 12:00–24:00（12pm–12am）</span>
+            <span data-lang="en" hidden>Address: 11, Jalan Austin Height 7/2, Taman Mount Austin, 81100 Johor Bahru, Johor<br>Hours: Daily 12:00–24:00 (12pm–12am)</span>
+          </div>
+          <div className="loc-actions"><a className="btn" href="https://maps.app.goo.gl/TwqN4NqPGLLrpr8q9?g_st=ipc" target="_blank" rel="noopener"><span data-lang="zh">一键导航</span><span data-lang="en" hidden>One‑tap directions</span></a></div>
+        </div>
+      </article>
+      <article className="card loc" aria-label="Paradigm Mall JB 分店">
+        <img className="loc-visual" src="assets/paradigm.webp" alt="Fufootea Paradigm Mall JB 门店" loading="lazy" />
+        <div className="meta"><h3>Paradigm Mall JB · L3（Lot 12E–H）</h3>
+          <div className="muted">
+            <span data-lang="zh">地址：Paradigm Mall Johor Bahru，Level 3 · Lot 12E–H（近溜冰场）<br>营业时间：每日 10:00–22:00（10am–10pm）</span>
+            <span data-lang="en" hidden>Address: Paradigm Mall Johor Bahru, Level 3 · Lot 12E–H (near ice rink)<br>Hours: Daily 10:00–22:00 (10am–10pm)</span>
+          </div>
+          <div className="loc-actions"><a className="btn" href="https://maps.app.goo.gl/jRpvqj6F4kZiAxpy7?g_st=ipc" target="_blank" rel="noopener"><span data-lang="zh">一键导航</span><span data-lang="en" hidden>One‑tap directions</span></a></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section className="container" aria-labelledby="rev-title"><h2 id="rev-title"><span data-lang="zh">大家怎么说</span><span data-lang="en" hidden>What People Say</span></h2><div className="quotes"><blockquote>“真材实料，水果香气很干净。”</blockquote><blockquote>“内装极简有质感，出片好看。”</blockquote><blockquote>“榴莲泡芙爆浆，太上头了。”</blockquote></div></section>
+
+
+    <section id="instagram" className="container" aria-labelledby="ig-title">
+    <div className="sec-head">
+      <h2 id="ig-title"><span data-lang="zh">社交媒体</span><span data-lang="en" hidden>Social Media</span></h2>
+
+    </div>
+    <div className="ig-grid" id="ig-grid" aria-live="polite">
+      <a className="ig-card" href="https://www.xiaohongshu.com/discovery/item/67724328000000001300cc8a?source=webshare&xhsshare=pc_web&xsec_token=ABTLYT3aVuy8Oi2x3U7821Mp1rALTvuIKGBZeu3FqmlqY=&xsec_source=pc_share" target="_blank" rel="noopener" aria-label="小红书 · 被JB奶茶店耽误的泡芙"><span className="ig-badge">小红书</span><img src="assets/xhs1.png" alt="小红书 帖子 1" /></a>
+      <a className="ig-card" href="https://www.instagram.com/reel/DNFPywJzzBZ/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" target="_blank" rel="noopener" aria-label="Instagram Reels"><span className="ig-badge">Instagram</span><img src="assets/Ins1.png" alt="Instagram Reels" /></a>
+      <a className="ig-card" href="https://www.xiaohongshu.com/discovery/item/687a090c00000000120306fb?source=webshare&xhsshare=pc_web&xsec_token=ABxmSeK7CxGEF_r8WNVLUDg80FsuKSretTHJfmsdmTnMY=&xsec_source=pc_share" target="_blank" rel="noopener" aria-label="小红书 · JB周末亲子出游好去处"><span className="ig-badge">小红书</span><img src="assets/xhs2.png" alt="小红书 帖子 2" /></a>
+    </div>
+  </section>
+
+  <!-- Contact moved below Social Media -->
+  <section id="contact" className="container" aria-labelledby="contact-title"><div className="sec-head"><h2 id="contact-title"><span data-lang="zh">订阅与联系</span><span data-lang="en" hidden>Subscribe & Contact</span></h2><div className="muted">获取当季限定与新品试饮</div></div><form className="newsletter" name="subscribe"><input type="hidden" name="form-name" value="subscribe" /><input aria-label="邮箱" type="email" name="email" placeholder="Coming soon" disabled /><button className="btn" type="button" disabled>Subscribe</button><a className="btn" href="https://wa.me/60136041491" target="_blank" rel="noopener" aria-label="WhatsApp 联系我们">WhatsApp</a></form></section>
+
+
+
+
+</main>
+
+    </>
+  );
 }
